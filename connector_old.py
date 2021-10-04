@@ -6,8 +6,8 @@ import xml.etree.ElementTree as ET
 import csv
 sys.path.append('..')
 
-ROBOT_HOST = '192.168.0.2'
-# ROBOT_HOST = '192.168.56.101'
+# ROBOT_HOST = '192.168.0.2'
+ROBOT_HOST = '192.168.56.101'
 ROBOT_PORT = 30004
 config_filename = 'rtdeIO.xml'
 RTDE_inputs = 'RTDE_Inputs.csv'
@@ -27,8 +27,6 @@ class RTDEConnect:
         self.frequency = frequency
         self._rtdein = {}
         self._rtdeout = {}
-        self.inputDict = {}
-        self.outputDict = {}
         self._rtdein, self._rtdeout = RTDEConnect._rtdeIO(self._rtdein, self._rtdeout)
         self.programState = {
             0: 'Stopping',
@@ -55,10 +53,10 @@ class RTDEConnect:
         for i in range(len(recipes)):
             # Check if recipe key's variables all exist as RTDE Inputs. If so, send the key as an input setup.
             if all(item in list(self._rtdein.keys()) for item in recipes[i].names):
-                self.inputDict[recipes[i].key] = self.con.send_input_setup(recipes[i].names, recipes[i].types)
+                self.con.send_input_setup(recipes[i].names, recipes[i].types)
             # Check if recipe key's variables all exist as RTDE Outputs. If so, send the key as an output setup.
             elif all(item in list(self._rtdeout.keys()) for item in recipes[i].names):
-                self.outputDict[tuple(recipes[i].names)] = self.con.send_output_setup(recipes[i].names, recipes[i].types)
+                self.con.send_output_setup(recipes[i].names, recipes[i].types)
             else:
                 print(f'Error: {recipes[i].key} has a mix of inputs and outputs or has a variable that does not '
                       f'exist\nExiting...')
@@ -100,10 +98,7 @@ class RTDEConnect:
 
 if __name__ == "__main__":
     state_monitor = RTDEConnect(ROBOT_HOST, config_filename)
-    state_monitor.inputDict["input2"].__dict__["input_int_register_0"] = 1
-    state_monitor.send(state_monitor.inputDict["input2"])
     runtime_old = -1
-    print(state_monitor.inputDict)
     while state_monitor.keep_running:
         state = state_monitor.receive()
 
@@ -111,7 +106,7 @@ if __name__ == "__main__":
             break
 
         if state.runtime_state != runtime_old:
-            print(f'Robot program is {state_monitor.programState.get(state.runtime_state)}')
+            logging.info(f'Robot program is {state_monitor.programState.get(state.runtime_state)}')
             runtime_old = state.runtime_state
 
 # rTest = RTDEConnect(ROBOT_HOST, config_filename)

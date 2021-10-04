@@ -27,6 +27,9 @@ class RTDEConnect:
         self.frequency = frequency
         self._rtdein = {}
         self._rtdeout = {}
+        self.inputDict = {}
+        self.outputDict = {}
+        self.inputKeys = {}
         self._rtdein, self._rtdeout = RTDEConnect._rtdeIO(self._rtdein, self._rtdeout)
         self.programState = {
             0: 'Stopping',
@@ -53,10 +56,11 @@ class RTDEConnect:
         for i in range(len(recipes)):
             # Check if recipe key's variables all exist as RTDE Inputs. If so, send the key as an input setup.
             if all(item in list(self._rtdein.keys()) for item in recipes[i].names):
-                self.con.send_input_setup(recipes[i].names, recipes[i].types)
+                self.inputDict[recipes[i].key] = self.con.send_input_setup(recipes[i].names, recipes[i].types)
+                self.inputKeys[recipes[i].key] = recipes[i].names
             # Check if recipe key's variables all exist as RTDE Outputs. If so, send the key as an output setup.
             elif all(item in list(self._rtdeout.keys()) for item in recipes[i].names):
-                self.con.send_output_setup(recipes[i].names, recipes[i].types)
+                self.outputDict[tuple(recipes[i].names)] = self.con.send_output_setup(recipes[i].names, recipes[i].types)
             else:
                 print(f'Error: {recipes[i].key} has a mix of inputs and outputs or has a variable that does not '
                       f'exist\nExiting...')
@@ -69,8 +73,19 @@ class RTDEConnect:
     def receive(self):
         return self.con.receive()
 
-    def send(self, cmd):
-        return self.con.send(cmd)
+    def send(self, key, field, value):
+        if type(field) is not list:
+            self.inputDict[key].__dict__[field] = value
+        else:
+            for i in range(len(field)):
+                self.inputDict[key].__dict__[field[i]] = value[i]
+        self.con.send(self.inputDict[key])
+        # return self.con.send(cmd)
+
+    def sendall(self, key, value):
+        for i in range(len(value)):
+            self.inputDict[key].__dict__[self.inputKeys[key][i]] = value[i]
+        self.con.send(self.inputDict[key])
 
     def shutdown(self):
         self.con.send_pause()
@@ -98,6 +113,10 @@ class RTDEConnect:
 
 if __name__ == "__main__":
     state_monitor = RTDEConnect(ROBOT_HOST, config_filename)
+    fields = ["input_int_register_0", "input_int_register_1", "input_int_register_2"]
+    vals = [6, 4, 101]
+    state_monitor.send("input2", fields, vals)
+    state_monitor.sendall("input2", vals)
     runtime_old = -1
     while state_monitor.keep_running:
         state = state_monitor.receive()
@@ -106,7 +125,7 @@ if __name__ == "__main__":
             break
 
         if state.runtime_state != runtime_old:
-            logging.info(f'Robot program is {state_monitor.programState.get(state.runtime_state)}')
+            print(f'Robot program is {state_monitor.programState.get(state.runtime_state)}')
             runtime_old = state.runtime_state
 
 # rTest = RTDEConnect(ROBOT_HOST, config_filename)

@@ -18,8 +18,8 @@
 
 	<recipe key="input2">
 		<field name="input_int_register_0" type="INT32"/>
-		<field name="standard_analog_output_0" type="DOUBLE"/>
-		<field name="standard_analog_output_1" type="DOUBLE"/>
+		<field name="input_int_register_1" type="INT32"/>
+		<field name="input_int_register_2" type="INT32"/>
 	</recipe>
 
 </rtde_config>
