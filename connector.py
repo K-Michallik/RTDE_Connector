@@ -11,7 +11,7 @@ ROBOT_HOST = '192.168.56.101'
 ROBOT_PORT = 30004
 config_filename = 'rtdeIO.xml'
 RTDE_inputs = 'RTDE_Inputs.csv'
-RTDE_outputs ='RTDE_Outputs.csv'
+RTDE_outputs = 'RTDE_Outputs.csv'
 
 
 class RTDEConnect:
@@ -44,7 +44,6 @@ class RTDEConnect:
         # self.con._RTDE__input_config[1].speed_slider_mask = 1
 
     def initialize(self):
-        conf = rtde_config.ConfigFile(self.config)
         self.con.connect()
         self.con.get_controller_version()
         x = rtde_config.Recipe
@@ -57,6 +56,7 @@ class RTDEConnect:
             # Check if recipe key's variables all exist as RTDE Inputs. If so, send the key as an input setup.
             if all(item in list(self._rtdein.keys()) for item in recipes[i].names):
                 self.inputDict[recipes[i].key] = self.con.send_input_setup(recipes[i].names, recipes[i].types)
+                # Add all input fields to their respective keys. Used for sending inputs to RTDE.
                 self.inputKeys[recipes[i].key] = recipes[i].names
             # Check if recipe key's variables all exist as RTDE Outputs. If so, send the key as an output setup.
             elif all(item in list(self._rtdeout.keys()) for item in recipes[i].names):
