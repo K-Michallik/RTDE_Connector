@@ -37,7 +37,6 @@ logging.getLogger().setLevel(logging.INFO)
 
 
 def setp_to_list(output):
-    set_list = []
     setp = [output.input_double_register_0, output.input_double_register_1, output.input_double_register_2,
             output.input_double_register_3, output.input_double_register_4, output.input_double_register_5]
     set_list = [format(elem, '.2f') for elem in setp]
@@ -54,7 +53,7 @@ while keep_running:
     state = monitor.receive()
 
     if state is None:
-        break;
+        break
     
     # do something...
     if state.output_int_register_0 != 0:

@@ -6,8 +6,8 @@ import xml.etree.ElementTree as ET
 import csv
 sys.path.append('..')
 
-# ROBOT_HOST = '192.168.0.2'
-ROBOT_HOST = '192.168.56.101'
+ROBOT_HOST = '192.168.0.2'
+# ROBOT_HOST = '192.168.56.101'
 ROBOT_PORT = 30004
 config_filename = 'rtdeIO.xml'
 RTDE_inputs = 'RTDE_Inputs.csv'
@@ -30,6 +30,7 @@ class RTDEConnect:
         self.inputDict = {}
         self.outputDict = {}
         self.inputKeys = {}
+        self.controlVersion = None
         self._rtdein, self._rtdeout = RTDEConnect._rtdeIO(self._rtdein, self._rtdeout)
         self.programState = {
             0: 'Stopping',
@@ -41,11 +42,16 @@ class RTDEConnect:
             6: 'Retracting'
         }
         self.initialize()
-        # self.con._RTDE__input_config[1].speed_slider_mask = 1
 
     def initialize(self):
         self.con.connect()
-        self.con.get_controller_version()
+        self.controlVersion = self.con.get_controller_version()
+        if not self.controlVersion[0] == 5:
+            print("Robot connected is not an E-series. Exiting...")
+            sys.exit()
+        if self.controlVersion[1] < 10:
+            print("Current Polyscope software is below 5.10. Please update robot and run again. Exiting...")
+            sys.exit()
         x = rtde_config.Recipe
         tree = ET.parse(self.config)
         root = tree.getroot()
@@ -127,6 +133,3 @@ if __name__ == "__main__":
         if state.runtime_state != runtime_old:
             print(f'Robot program is {state_monitor.programState.get(state.runtime_state)}')
             runtime_old = state.runtime_state
-
-# rTest = RTDEConnect(ROBOT_HOST, config_filename)
-# rTest._ioParse(RTDE_inputs, RTDE_outputs)
