@@ -18,12 +18,12 @@ class RTDEConnect:
     _inputlist = RTDE_inputs
     _outputlist = RTDE_outputs
 
-    def __init__(self, robotIP, fileName, inputlist=RTDE_inputs, outputlist=RTDE_outputs, frequency=500):
-        self.robotIP = robotIP
+    def __init__(self, robot_ip, filename, frequency=500):
+        self.robotIP = robot_ip
         self.port = 30004
         self.con = rtde.RTDE(self.robotIP, self.port)
         self.keep_running = True
-        self.config = fileName
+        self.config = filename
         self.frequency = frequency
         self._rtdein = {}
         self._rtdeout = {}
@@ -31,7 +31,7 @@ class RTDEConnect:
         self.outputDict = {}
         self.inputKeys = {}
         self.controlVersion = None
-        self._rtdein, self._rtdeout = RTDEConnect._rtdeIO(self._rtdein, self._rtdeout)
+        self._rtdein, self._rtdeout = RTDEConnect._create_dicts(self._rtdein, self._rtdeout)
         self.programState = {
             0: 'Stopping',
             1: 'Stopped',
@@ -97,9 +97,8 @@ class RTDEConnect:
         self.con.send_pause()
         self.con.disconnect()
 
-
     @staticmethod
-    def _csvparse(csvlist, parsedDict):
+    def _csvparse(csvlist, parsed_dict):
         empty_lines = 0
         with open(csvlist, newline='') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
@@ -107,13 +106,13 @@ class RTDEConnect:
                 if not ''.join(row).strip():
                     empty_lines += 1
                     continue
-                parsedDict[row[0]] = row[1]
-        return parsedDict
+                parsed_dict[row[0]] = row[1]
+        return parsed_dict
 
     @classmethod
-    def _rtdeIO(cls, inputDict, outputDict):
-        inputs = cls._csvparse(cls._inputlist, inputDict)
-        outputs = cls._csvparse(cls._outputlist, outputDict)
+    def _create_dicts(cls, input_dict, output_dict):
+        inputs = cls._csvparse(cls._inputlist, input_dict)
+        outputs = cls._csvparse(cls._outputlist, output_dict)
         return inputs, outputs
 
 
@@ -122,7 +121,7 @@ if __name__ == "__main__":
     fields = ["input_int_register_0", "input_int_register_1", "input_int_register_2"]
     vals = [6, 4, 101]
     state_monitor.send("input2", fields, vals)
-    state_monitor.sendall("input2", vals)
+    # state_monitor.sendall("input2", vals)
     runtime_old = -1
     while state_monitor.keep_running:
         state = state_monitor.receive()
