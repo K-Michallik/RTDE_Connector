@@ -41,9 +41,9 @@ class RTDEConnect:
             5: 'Resuming',
             6: 'Retracting'
         }
-        self.initialize()
+        self._initialize()
 
-    def initialize(self):
+    def _initialize(self):
         self.con.connect()
         self.controlVersion = self.con.get_controller_version()
         if not self.controlVersion[0] == 5:
@@ -77,9 +77,22 @@ class RTDEConnect:
             sys.exit()
 
     def receive(self):
+        """
+        Receive a packet of data from RTDE at the frequency specified in instantiation of the Connector.
+        :return: Packet of output data
+        """
         return self.con.receive()
 
     def send(self, key, field, value):
+        """
+        Send RTDE inputs to the robot with a given list of fields and values.
+        All fields within a key must be sent with an associated value.
+        :param str key: the key to pull the corresponding inputs from.
+        :param field: A list of fields (RTDE inputs) to send updated values to. Can also be a string value when
+        specifying a single field.
+        :param value: A list of updated input values to send to RTDE. Must match the order and type of
+        the field parameter. Can be a single value in the case of sending a single field.
+        """
         if type(field) is not list:
             self.inputDict[key].__dict__[field] = value
         else:
@@ -89,11 +102,21 @@ class RTDEConnect:
         # return self.con.send(cmd)
 
     def sendall(self, key, value):
+        """
+        Send RTDE inputs to the robot with a given list of values. The order of values matches the recipe XML file
+        for a given key.
+        :param str key: The key to pull the corresponding inputs from.
+        :param value: A list of updated input values to send to RTDE.
+        """
         for i in range(len(value)):
             self.inputDict[key].__dict__[self.inputKeys[key][i]] = value[i]
         self.con.send(self.inputDict[key])
 
     def shutdown(self):
+        """
+        Safely disconnects from RTDE and shuts down.
+        :return: None
+        """
         self.con.send_pause()
         self.con.disconnect()
 

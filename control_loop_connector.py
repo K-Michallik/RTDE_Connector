@@ -42,6 +42,8 @@ def setp_to_list(output):
     set_list = [format(elem, '.2f') for elem in setp]
 
     return [float(x) for x in set_list]
+    # Users running 5.11.5 or later can simply return "setp" instead of set_list.
+    # return setp
 
 
 # control loop
@@ -54,7 +56,7 @@ while keep_running:
 
     if state is None:
         break
-    
+
     # do something...
     if state.output_int_register_0 != 0:
         new_setp = setp1 if setp_to_list(state) == setp2 else setp2
