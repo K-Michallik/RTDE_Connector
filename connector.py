@@ -108,8 +108,11 @@ class RTDEConnect:
         :param str key: The key to pull the corresponding inputs from.
         :param value: A list of updated input values to send to RTDE.
         """
-        for i in range(len(value)):
-            self.inputDict[key].__dict__[self.inputKeys[key][i]] = value[i]
+        if type(value) is not list:
+            self.inputDict[key].__dict__[self.inputKeys[key][0]] = value
+        else:
+            for i in range(len(value)):
+                self.inputDict[key].__dict__[self.inputKeys[key][i]] = value[i]
         self.con.send(self.inputDict[key])
 
     def shutdown(self):
@@ -151,7 +154,6 @@ if __name__ == "__main__":
 
         if state is None:
             break
-
         if state.runtime_state != runtime_old:
             print(f'Robot program is {state_monitor.programState.get(state.runtime_state)}')
             runtime_old = state.runtime_state

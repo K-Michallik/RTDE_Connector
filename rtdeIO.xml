@@ -22,4 +22,8 @@
 		<field name="input_int_register_2" type="INT32"/>
 	</recipe>
 
+	<recipe key="bitreg">
+		<field name="input_bit_register_70" type="BOOL"/>
+	</recipe>
+
 </rtde_config>
